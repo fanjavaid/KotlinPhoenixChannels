@@ -3,5 +3,8 @@
 /.idea/workspace.xml
 /.idea/libraries
 /.idea/encodings.xml
+/out
 .DS_Store
 /build
+*.iml
+/.idea

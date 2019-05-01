@@ -130,7 +130,7 @@ public class Channel {
     public Push join() throws IllegalStateException, IOException {
         if (this.joinedOnce) {
             throw new IllegalStateException(
-                "Tried to join multiple times. 'join' can only be invoked once per channel");
+                    "Tried to join multiple times. 'join' can only be invoked once per channel");
         }
         this.joinedOnce = true;
         this.sendJoin();
@@ -209,7 +209,7 @@ public class Channel {
      * @throws IllegalStateException Thrown if the channel has not yet been joined
      */
     private Push push(final String event, final JsonNode payload, final long timeout)
-        throws IOException, IllegalStateException {
+            throws IOException, IllegalStateException {
         if (!this.joinedOnce) {
             throw new IllegalStateException("Unable to push event before channel has been joined");
         }
@@ -258,10 +258,10 @@ public class Channel {
     @Override
     public String toString() {
         return "Channel{" +
-            "topic='" + topic + '\'' +
-            ", message=" + payload +
-            ", bindings(" + bindings.size() + ")=" + bindings +
-            '}';
+                "topic='" + topic + '\'' +
+                ", message=" + payload +
+                ", bindings(" + bindings.size() + ")=" + bindings +
+                '}';
     }
 
     /**
@@ -308,7 +308,7 @@ public class Channel {
     public boolean isErrored() {
         return state == ChannelState.ERRORED;
     }
-  
+
     public boolean isClosed() {
         return state == ChannelState.CLOSED;
     }
@@ -316,7 +316,7 @@ public class Channel {
     public boolean isJoining() {
         return state == ChannelState.JOINING;
     }
-  
+
     public String joinRef() {
         return this.joinPush.getRef();
     }
