@@ -21,7 +21,7 @@ class Push internal constructor(
 
     private var refEvent: String? = null
 
-    internal var isSent = false
+    var isSent = false
         private set
 
     var ref: String? = null
@@ -80,13 +80,14 @@ class Push internal constructor(
 
     @Throws(IOException::class)
     fun send() {
-        this.ref = channel.socket.makeRef()
+        val ref = channel.socket.makeRef()
         log.trace("Push send, ref={}", ref)
 
-        this.refEvent = Socket.replyEventName(ref)
-        this.receivedEnvelope = null
+        this.ref = ref
+        refEvent = Socket.replyEventName(ref)
+        receivedEnvelope = null
 
-        this.channel.on(this.refEvent, object : IMessageCallback {
+        channel.on(this.refEvent, object : IMessageCallback {
             override fun onMessage(envelope: Envelope?) {
                 receivedEnvelope = envelope
                 matchReceive(receivedEnvelope?.responseStatus, envelope)
@@ -95,17 +96,17 @@ class Push internal constructor(
             }
         })
 
-        this.startTimeout()
-        this.isSent = true
+        startTimeout()
+        isSent = true
         val envelope = Envelope(this.channel.topic, this.event, this.payload, this.ref, this.channel.joinRef())
-        this.channel.socket.push(envelope)
+        channel.socket.push(envelope)
     }
 
     private fun reset() {
-        this.cancelRefEvent()
-        this.refEvent = null
-        this.receivedEnvelope = null
-        this.isSent = false
+        cancelRefEvent()
+        refEvent = null
+        receivedEnvelope = null
+        isSent = false
     }
 
     private fun cancelRefEvent() {
@@ -113,8 +114,8 @@ class Push internal constructor(
     }
 
     private fun cancelTimeout() {
-        this.timeoutHook.timerTask!!.cancel()
-        this.timeoutHook.timerTask = null
+        timeoutHook.timerTask?.cancel()
+        timeoutHook.timerTask = null
     }
 
     private fun createTimerTask(): TimerTask {

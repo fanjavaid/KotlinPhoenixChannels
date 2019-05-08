@@ -62,7 +62,12 @@ class Channel(
         })
         on(ChannelEvent.REPLY.phxEvent, object : IMessageCallback {
             override fun onMessage(envelope: Envelope?) {
-                this@Channel.trigger(Socket.replyEventName(envelope?.getRef()), envelope)
+                val ref = envelope?.getRef()
+                if (ref == null) {
+                    throw IllegalArgumentException("ref")
+                } else {
+                    this@Channel.trigger(Socket.replyEventName(ref), envelope)
+                }
             }
         })
     }

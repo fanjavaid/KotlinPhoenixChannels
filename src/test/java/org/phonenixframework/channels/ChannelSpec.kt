@@ -48,7 +48,7 @@ class ChannelSpec : StringSpec() {
             }
 
             socket.connect()
-            socket.chan("rooms:lobby", null).join().receive("ok", callback)
+            socket.chan("rooms:lobby").join().receive("ok", callback)
 
             // TODO change this to Coroutine
             Thread.sleep(1000)
