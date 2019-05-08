@@ -79,7 +79,7 @@ class Push internal constructor(
     }
 
     @Throws(IOException::class)
-    internal fun send() {
+    fun send() {
         this.ref = channel.socket.makeRef()
         log.trace("Push send, ref={}", ref)
 

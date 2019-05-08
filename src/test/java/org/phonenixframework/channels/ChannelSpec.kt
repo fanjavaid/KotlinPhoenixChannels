@@ -41,8 +41,10 @@ class ChannelSpec : StringSpec() {
         "Channel subscribe" {
             val defaultEnvelope = Envelope()
             var testedEnvelope = defaultEnvelope
-            val callback = IMessageCallback {
-                testedEnvelope = it
+            val callback = object : IMessageCallback {
+                override fun onMessage(envelope: Envelope) {
+                    testedEnvelope = envelope
+                }
             }
 
             socket.connect()
