@@ -33,12 +33,12 @@ test {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.8.3'
-    implementation 'com.google.code.gson:gson:2.8.5'
     implementation 'com.squareup.okhttp3:okhttp:3.6.0'
     implementation 'org.slf4j:slf4j-api:1.7.22'
+    implementation 'com.google.code.gson:gson:2.8.5'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 
+    testImplementation 'com.fasterxml.jackson.core:jackson-databind:2.8.3'
     testImplementation 'io.kotlintest:kotlintest-runner-junit5:3.3.2'
 }
 

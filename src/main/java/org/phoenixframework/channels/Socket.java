@@ -1,27 +1,16 @@
 package org.phoenixframework.channels;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import okhttp3.*;
+import okio.ByteString;
+import org.phoenixframework.channels.data.DefaultPayload;
+import org.phoenixframework.channels.data.JsonPayload;
+import org.phoenixframework.channels.data.Plugin;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
-
-import org.phoenixframework.channels.data.DefaultPayload;
-import org.phoenixframework.channels.data.Payload;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
-import okhttp3.WebSocket;
-import okhttp3.WebSocketListener;
-import okio.ByteString;
 
 public class Socket {
 
@@ -49,7 +38,7 @@ public class Socket {
             log.trace("onMessage: {}", text);
 
             try {
-                final Envelope envelope = objectMapper.readValue(text, Envelope.class);
+                final Envelope envelope = Plugin.INSTANCE.fromJson(text, Envelope.class);
                 synchronized (channels) {
                     for (final Channel channel : channels) {
                         if (channel.isMember(envelope)) {
@@ -129,8 +118,6 @@ public class Socket {
 
     private final Set<IMessageCallback> messageCallbacks = Collections.newSetFromMap(new HashMap<IMessageCallback, Boolean>());
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
     private boolean reconnectOnFailure = true;
 
     private TimerTask reconnectTimerTask = null;
@@ -173,7 +160,7 @@ public class Socket {
      * @param payload The message payload
      * @return A Channel instance to be used for sending and receiving events for the topic
      */
-    public Channel chan(final String topic, final Payload payload) {
+    public Channel chan(final String topic, final JsonPayload payload) {
         log.trace("chan: {}, {}", topic, payload);
         final Channel channel = new Channel(topic, payload, Socket.this);
         synchronized (channels) {
@@ -261,13 +248,13 @@ public class Socket {
      * @throws IOException Thrown if the message cannot be sent
      */
     public Socket push(final Envelope envelope) throws IOException {
-        Map<String, Object> node = new HashMap<>();
+        JsonPayload node = new JsonPayload();
         node.put("topic", envelope.getTopic());
         node.put("event", envelope.getEvent());
         node.put("ref", envelope.getRef());
         node.put("join_ref", envelope.getJoinRef());
-        node.put("payload", envelope.getPayload() == null ? objectMapper.createObjectNode() : envelope.getPayload());
-        final String json = objectMapper.writeValueAsString(node);
+        node.put("payload", envelope.getPayload() == null ? DefaultPayload.INSTANCE : envelope.getPayload());
+        final String json = Plugin.INSTANCE.toJson(node);
 
         log.trace("push: {}, isConnected:{}, JSON:{}", envelope, isConnected(), json);
 

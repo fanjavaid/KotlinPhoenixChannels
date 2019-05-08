@@ -1,5 +1,6 @@
 package org.phoenixframework.channels;
 
+import org.phoenixframework.channels.data.JsonPayload;
 import org.phoenixframework.channels.data.Payload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +36,7 @@ public class Channel {
 
     private final String topic;
 
-    public Channel(final String topic, final Payload payload, final Socket socket) {
+    public Channel(final String topic, final JsonPayload payload, final Socket socket) {
         this.topic = topic;
         this.payload = payload;
         this.socket = socket;
@@ -203,7 +204,7 @@ public class Channel {
      * @throws IOException           Thrown if the payload cannot be pushed
      * @throws IllegalStateException Thrown if the channel has not yet been joined
      */
-    private Push push(final String event, final Payload payload, final long timeout)
+    private Push push(final String event, final JsonPayload payload, final long timeout)
             throws IOException, IllegalStateException {
         if (!this.joinedOnce) {
             throw new IllegalStateException("Unable to push event before channel has been joined");
@@ -217,7 +218,7 @@ public class Channel {
         return pushEvent;
     }
 
-    public Push push(final String event, final Payload payload) throws IOException {
+    public Push push(final String event, final JsonPayload payload) throws IOException {
         return push(event, payload, DEFAULT_TIMEOUT);
     }
 

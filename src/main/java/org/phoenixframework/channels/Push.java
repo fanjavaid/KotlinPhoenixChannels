@@ -1,17 +1,12 @@
 package org.phoenixframework.channels;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TimerTask;
-
+import org.phoenixframework.channels.data.JsonPayload;
 import org.phoenixframework.channels.data.Payload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.*;
 
 public class Push {
 
@@ -58,7 +53,7 @@ public class Push {
 
     private String event = null;
 
-    private Payload payload = null;
+    private JsonPayload payload = null;
 
     private final Map<String, List<IMessageCallback>> recHooks = new HashMap<>();
 
@@ -72,7 +67,7 @@ public class Push {
 
     private String ref;
 
-    Push(final Channel channel, final String event, final Payload payload, final long timeout) {
+    Push(final Channel channel, final String event, final JsonPayload payload, final long timeout) {
         this.channel = channel;
         this.event = event;
         this.payload = payload;

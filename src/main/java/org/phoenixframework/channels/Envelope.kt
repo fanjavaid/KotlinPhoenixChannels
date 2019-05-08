@@ -1,15 +1,12 @@
 package org.phoenixframework.channels
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.google.gson.annotations.SerializedName
-import org.phoenixframework.channels.data.Payload
+import org.phoenixframework.channels.data.JsonPayload
 
-// To fix UnrecognizedPropertyException.
-@JsonIgnoreProperties(ignoreUnknown = true)
 class Envelope(
         @SerializedName(value = "topic") val topic: String,
         @SerializedName(value = "event") val event: String,
-        @SerializedName(value = "payload") val payload: Payload?,
+        @SerializedName(value = "payload") val payload: JsonPayload?,
         @SerializedName(value = "ref") private val ref: String?,
         @SerializedName(value = "join_ref") private val join_ref: String?
 ) {

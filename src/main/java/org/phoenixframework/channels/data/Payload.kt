@@ -1,5 +1,5 @@
 package org.phoenixframework.channels.data
 
-interface Payload {
+internal interface Payload {
     fun getTextValue(key: String): String?
 }
