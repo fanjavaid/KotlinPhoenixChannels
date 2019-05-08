@@ -17,7 +17,7 @@ class Socket @JvmOverloads constructor(
 
     private val channels = ArrayList<Channel>()
 
-    private val errorCallbacks = Collections.newSetFromMap(HashMap<IErrorCallback, Boolean>())
+    private val errorCallbacks = Collections.newSetFromMap(HashMap<ErrorCallback, Boolean>())
 
     private var heartbeatTimerTask: TimerTask? = null
 
@@ -116,7 +116,7 @@ class Socket @JvmOverloads constructor(
                 //the same channel error callbacks multiple times?
                 triggerChannelError()
                 for (callback in errorCallbacks) {
-                    callback.onError(t?.message ?: "")
+                    callback.invoke(t?.message ?: "")
                 }
             } finally {
                 // Assume closed on failure
@@ -190,7 +190,7 @@ class Socket @JvmOverloads constructor(
      * @param callback The callback to receive ERROR events
      * @return This Socket instance
      */
-    fun onError(callback: IErrorCallback): Socket {
+    fun onError(callback: ErrorCallback): Socket {
         this.errorCallbacks.add(callback)
         return this
     }

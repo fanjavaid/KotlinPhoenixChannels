@@ -16,7 +16,7 @@ class ChannelSpec : StringSpec() {
     private val socketOpenCallback = mockk<ISocketOpenCallback>(relaxUnitFun = true)
     private val socketCloseCallback = mockk<ISocketCloseCallback>(relaxUnitFun = true)
     private val socketMessageCallback = mockk<MessageCallback>(relaxUnitFun = true)
-    private val socketErrorCallback = mockk<IErrorCallback>(relaxUnitFun = true)
+    private val socketErrorCallback = mockk<ErrorCallback>(relaxUnitFun = true)
 
     override fun beforeTest(testCase: TestCase) {
         super.beforeTest(testCase)

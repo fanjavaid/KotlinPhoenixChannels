@@ -37,31 +37,29 @@ class Channel(
     init {
         joinPush = Push(this, ChannelEvent.JOIN.phxEvent, payload, DEFAULT_TIMEOUT).apply {
             receive("ok") {
-                this@Channel.state = ChannelState.JOINED
+                state = ChannelState.JOINED
             }
             timeout(object : ITimeoutCallback {
                 override fun onTimeout() {
-                    this@Channel.state = ChannelState.ERRORED
+                    state = ChannelState.ERRORED
                 }
             })
         }
 
         onClose {
-            this@Channel.state = ChannelState.CLOSED
-            this@Channel.socket.remove(this@Channel)
+            state = ChannelState.CLOSED
+            socket.remove(this)
         }
-        onError(object : IErrorCallback {
-            override fun onError(reason: String) {
-                this@Channel.state = ChannelState.ERRORED
-                scheduleRejoinTimer()
-            }
-        })
+        onError {
+            state = ChannelState.ERRORED
+            scheduleRejoinTimer()
+        }
         on(ChannelEvent.REPLY.phxEvent) {
             val ref = it?.getRef()
             if (ref == null) {
                 throw IllegalArgumentException("ref")
             } else {
-                this@Channel.trigger(Socket.replyEventName(ref), it)
+                trigger(Socket.replyEventName(ref), it)
             }
         }
     }
@@ -159,9 +157,9 @@ class Channel(
      *
      * @param callback Callback to be invoked on error
      */
-    private fun onError(callback: IErrorCallback) {
+    private fun onError(callback: ErrorCallback) {
         this.on(ChannelEvent.ERROR.phxEvent) {
-            callback.onError(it?.reason ?: "")
+            callback.invoke(it?.reason ?: "")
         }
     }
 
