@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimerTask;
 
+import org.phoenixframework.channels.data.Payload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,7 +58,7 @@ public class Push {
 
     private String event = null;
 
-    private JsonNode payload = null;
+    private Payload payload = null;
 
     private final Map<String, List<IMessageCallback>> recHooks = new HashMap<>();
 
@@ -71,7 +72,7 @@ public class Push {
 
     private String ref;
 
-    Push(final Channel channel, final String event, final JsonNode payload, final long timeout) {
+    Push(final Channel channel, final String event, final Payload payload, final long timeout) {
         this.channel = channel;
         this.event = event;
         this.payload = payload;
@@ -128,7 +129,7 @@ public class Push {
         return event;
     }
 
-    JsonNode getPayload() {
+    Payload getPayload() {
         return payload;
     }
 

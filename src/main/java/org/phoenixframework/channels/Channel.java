@@ -1,17 +1,12 @@
 package org.phoenixframework.channels;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.LinkedBlockingDeque;
-
+import org.phoenixframework.channels.data.Payload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.LinkedBlockingDeque;
 
 /**
  * Encapsulation of a Phoenix channel: a Socket, a topic and the channel's state.
@@ -30,7 +25,7 @@ public class Channel {
 
     private boolean joinedOnce = false;
 
-    private final JsonNode payload;
+    private final Payload payload;
 
     private final LinkedBlockingDeque<Push> pushBuffer = new LinkedBlockingDeque<>();
 
@@ -40,7 +35,7 @@ public class Channel {
 
     private final String topic;
 
-    public Channel(final String topic, final JsonNode payload, final Socket socket) {
+    public Channel(final String topic, final Payload payload, final Socket socket) {
         this.topic = topic;
         this.payload = payload;
         this.socket = socket;
@@ -208,7 +203,7 @@ public class Channel {
      * @throws IOException           Thrown if the payload cannot be pushed
      * @throws IllegalStateException Thrown if the channel has not yet been joined
      */
-    private Push push(final String event, final JsonNode payload, final long timeout)
+    private Push push(final String event, final Payload payload, final long timeout)
             throws IOException, IllegalStateException {
         if (!this.joinedOnce) {
             throw new IllegalStateException("Unable to push event before channel has been joined");
@@ -222,7 +217,7 @@ public class Channel {
         return pushEvent;
     }
 
-    public Push push(final String event, final JsonNode payload) throws IOException {
+    public Push push(final String event, final Payload payload) throws IOException {
         return push(event, payload, DEFAULT_TIMEOUT);
     }
 
