@@ -168,9 +168,7 @@ class Socket @JvmOverloads constructor(
     @Throws(IOException::class)
     fun disconnect() {
         log.trace("disconnect")
-        if (webSocket != null) {
-            webSocket!!.close(1001 /*CLOSE_GOING_AWAY*/, "Disconnected by client")
-        }
+        webSocket?.close(1001 /*CLOSE_GOING_AWAY*/, "Disconnected by client")
         cancelHeartbeatTimer()
         cancelReconnectTimer()
     }
@@ -242,7 +240,7 @@ class Socket @JvmOverloads constructor(
         val body = RequestBody.create(MediaType.parse("text/xml"), json!!)
 
         if (this.isConnected) {
-            webSocket!!.send(json)
+            webSocket?.send(json)
         } else {
             this.sendBuffer.add(body)
         }

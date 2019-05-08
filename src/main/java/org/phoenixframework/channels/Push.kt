@@ -119,9 +119,9 @@ class Push internal constructor(
 
     private fun createTimerTask(): TimerTask {
         val callback = Runnable {
-            this@Push.cancelRefEvent()
-            if (this@Push.timeoutHook.hasCallback()) {
-                this@Push.timeoutHook.callback!!.onTimeout()
+            cancelRefEvent()
+            if (timeoutHook.hasCallback()) {
+                timeoutHook.callback?.onTimeout()
             }
         }
 
