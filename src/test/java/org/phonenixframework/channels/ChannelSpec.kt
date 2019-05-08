@@ -15,7 +15,7 @@ class ChannelSpec : StringSpec() {
 
     private val socketOpenCallback = mockk<ISocketOpenCallback>(relaxUnitFun = true)
     private val socketCloseCallback = mockk<ISocketCloseCallback>(relaxUnitFun = true)
-    private val socketMessageCallback = mockk<IMessageCallback>(relaxUnitFun = true)
+    private val socketMessageCallback = mockk<MessageCallback>(relaxUnitFun = true)
     private val socketErrorCallback = mockk<IErrorCallback>(relaxUnitFun = true)
 
     override fun beforeTest(testCase: TestCase) {
@@ -41,10 +41,8 @@ class ChannelSpec : StringSpec() {
         "Channel subscribe" {
             val defaultEnvelope = Envelope()
             var testedEnvelope: Envelope? = defaultEnvelope
-            val callback = object : IMessageCallback {
-                override fun onMessage(envelope: Envelope?) {
-                    testedEnvelope = envelope
-                }
+            val callback = { envelope: Envelope? ->
+                testedEnvelope = envelope
             }
 
             socket.connect()

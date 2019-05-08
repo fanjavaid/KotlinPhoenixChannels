@@ -23,7 +23,7 @@ class Socket @JvmOverloads constructor(
 
     private val httpClient = OkHttpClient()
 
-    private val messageCallbacks = Collections.newSetFromMap(HashMap<IMessageCallback, Boolean>())
+    private val messageCallbacks = Collections.newSetFromMap(HashMap<MessageCallback, Boolean>())
 
     private var reconnectOnFailure = true
 
@@ -86,7 +86,7 @@ class Socket @JvmOverloads constructor(
                 }
 
                 for (callback in messageCallbacks) {
-                    callback.onMessage(envelope)
+                    callback.invoke(envelope)
                 }
             } catch (e: IOException) {
                 log.error("Failed to read message payload", e)
@@ -159,7 +159,7 @@ class Socket @JvmOverloads constructor(
         log.trace("connect")
         disconnect()
         // No support for ws:// or ws:// in okhttp. See https://github.com/square/okhttp/issues/1652
-        val httpUrl = this.endpointUri!!.replaceFirst("^ws:".toRegex(), "http:")
+        val httpUrl = this.endpointUri.replaceFirst("^ws:".toRegex(), "http:")
                 .replaceFirst("^wss:".toRegex(), "https:")
         val request = Request.Builder().url(httpUrl).build()
         webSocket = httpClient.newWebSocket(request, wsListener)
@@ -203,7 +203,7 @@ class Socket @JvmOverloads constructor(
      * @param callback The callback to receive MESSAGE events
      * @return This Socket instance
      */
-    fun onMessage(callback: IMessageCallback): Socket {
+    fun onMessage(callback: MessageCallback): Socket {
         this.messageCallbacks.add(callback)
         return this
     }

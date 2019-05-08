@@ -12,7 +12,7 @@ class Push internal constructor(
         timeout: Long
 ) {
 
-    val recHooks = HashMap<String, MutableList<IMessageCallback>>()
+    val recHooks = HashMap<String, MutableList<MessageCallback>>()
 
     private val timeoutHook = TimeoutHook(timeout)
 
@@ -43,15 +43,15 @@ class Push internal constructor(
      * @param callback The callback handler
      * @return This instance's self
      */
-    fun receive(status: String, callback: IMessageCallback): Push {
+    fun receive(status: String, callback: MessageCallback): Push {
         if (this.receivedEnvelope != null) {
-            val receivedStatus = this.receivedEnvelope!!.responseStatus
+            val receivedStatus = this.receivedEnvelope?.responseStatus
             if (receivedStatus != null && receivedStatus == status) {
-                callback.onMessage(this.receivedEnvelope!!)
+                callback.invoke(this.receivedEnvelope)
             }
         }
         synchronized(recHooks) {
-            var statusHooks: MutableList<IMessageCallback>? = this.recHooks[status]
+            var statusHooks: MutableList<MessageCallback>? = this.recHooks[status]
             if (statusHooks == null) {
                 statusHooks = ArrayList()
                 this.recHooks[status] = statusHooks
@@ -87,14 +87,13 @@ class Push internal constructor(
         refEvent = Socket.replyEventName(ref)
         receivedEnvelope = null
 
-        channel.on(this.refEvent, object : IMessageCallback {
-            override fun onMessage(envelope: Envelope?) {
-                receivedEnvelope = envelope
-                matchReceive(receivedEnvelope?.responseStatus, envelope)
-                cancelRefEvent()
-                cancelTimeout()
-            }
-        })
+        channel.on(this.refEvent) {
+            receivedEnvelope = it
+            matchReceive(receivedEnvelope?.responseStatus, it)
+            cancelRefEvent()
+            cancelTimeout()
+        }
+
 
         startTimeout()
         isSent = true
@@ -138,7 +137,7 @@ class Push internal constructor(
             val statusCallbacks = this.recHooks[status]
             if (statusCallbacks != null) {
                 for (callback in statusCallbacks) {
-                    callback.onMessage(envelope)
+                    callback.invoke(envelope)
                 }
             }
         }

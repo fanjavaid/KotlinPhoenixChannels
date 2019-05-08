@@ -36,11 +36,9 @@ class Channel(
 
     init {
         joinPush = Push(this, ChannelEvent.JOIN.phxEvent, payload, DEFAULT_TIMEOUT).apply {
-            receive("ok", object : IMessageCallback {
-                override fun onMessage(envelope: Envelope?) {
-                    this@Channel.state = ChannelState.JOINED
-                }
-            })
+            receive("ok") {
+                this@Channel.state = ChannelState.JOINED
+            }
             timeout(object : ITimeoutCallback {
                 override fun onTimeout() {
                     this@Channel.state = ChannelState.ERRORED
@@ -48,28 +46,24 @@ class Channel(
             })
         }
 
-        onClose(object : IMessageCallback {
-            override fun onMessage(envelope: Envelope?) {
-                this@Channel.state = ChannelState.CLOSED
-                this@Channel.socket.remove(this@Channel)
-            }
-        })
+        onClose {
+            this@Channel.state = ChannelState.CLOSED
+            this@Channel.socket.remove(this@Channel)
+        }
         onError(object : IErrorCallback {
             override fun onError(reason: String) {
                 this@Channel.state = ChannelState.ERRORED
                 scheduleRejoinTimer()
             }
         })
-        on(ChannelEvent.REPLY.phxEvent, object : IMessageCallback {
-            override fun onMessage(envelope: Envelope?) {
-                val ref = envelope?.getRef()
-                if (ref == null) {
-                    throw IllegalArgumentException("ref")
-                } else {
-                    this@Channel.trigger(Socket.replyEventName(ref), envelope)
-                }
+        on(ChannelEvent.REPLY.phxEvent) {
+            val ref = it?.getRef()
+            if (ref == null) {
+                throw IllegalArgumentException("ref")
+            } else {
+                this@Channel.trigger(Socket.replyEventName(ref), it)
             }
-        })
+        }
     }
 
     /**
@@ -119,11 +113,9 @@ class Channel(
 
     @Throws(IOException::class)
     fun leave(): Push {
-        return this.push(ChannelEvent.LEAVE.phxEvent).receive("ok", object : IMessageCallback {
-            override fun onMessage(envelope: Envelope?) {
-                this@Channel.trigger(ChannelEvent.CLOSE.phxEvent, null)
-            }
-        })
+        return this.push(ChannelEvent.LEAVE.phxEvent).receive("ok") {
+            trigger(ChannelEvent.CLOSE.phxEvent, null)
+        }
     }
 
     /**
@@ -151,14 +143,14 @@ class Channel(
      * @param callback The callback to be invoked with the event's message
      * @return The instance's self
      */
-    fun on(event: String?, callback: IMessageCallback): Channel {
+    fun on(event: String?, callback: MessageCallback): Channel {
         synchronized(bindings) {
             this.bindings.add(Binding(event, callback))
         }
         return this
     }
 
-    private fun onClose(callback: IMessageCallback) {
+    private fun onClose(callback: MessageCallback) {
         this.on(ChannelEvent.CLOSE.phxEvent, callback)
     }
 
@@ -168,15 +160,9 @@ class Channel(
      * @param callback Callback to be invoked on error
      */
     private fun onError(callback: IErrorCallback) {
-        this.on(ChannelEvent.ERROR.phxEvent, object : IMessageCallback {
-            override fun onMessage(envelope: Envelope?) {
-                var reason: String? = null
-                if (envelope != null) {
-                    reason = envelope.reason
-                }
-                callback.onError(reason!!)
-            }
-        })
+        this.on(ChannelEvent.ERROR.phxEvent) {
+            callback.onError(it?.reason ?: "")
+        }
     }
 
     /**
@@ -255,7 +241,7 @@ class Channel(
             for (binding in bindings) {
                 if (binding.event == triggerEvent) {
                     // Channel Events get the full envelope
-                    binding.callback.onMessage(envelope!!)
+                    binding.callback.invoke(envelope)
                     break
                 }
             }
