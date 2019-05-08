@@ -105,7 +105,7 @@ public class Channel {
             return false;
         }
 
-        boolean isLifecycleEvent = ChannelEvent.getEvent(event) != null;
+        boolean isLifecycleEvent = ChannelEvent.Companion.getEvent(event) != null;
 
         if (joinRef != null && isLifecycleEvent && joinRef != this.joinRef()) {
             log.info("dropping outdated message topic: %s, event: %s, joinRef: %s",
