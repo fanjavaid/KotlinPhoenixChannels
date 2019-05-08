@@ -40,9 +40,9 @@ class ChannelSpec : StringSpec() {
 
         "Channel subscribe" {
             val defaultEnvelope = Envelope()
-            var testedEnvelope = defaultEnvelope
+            var testedEnvelope: Envelope? = defaultEnvelope
             val callback = object : IMessageCallback {
-                override fun onMessage(envelope: Envelope) {
+                override fun onMessage(envelope: Envelope?) {
                     testedEnvelope = envelope
                 }
             }
@@ -54,7 +54,7 @@ class ChannelSpec : StringSpec() {
             Thread.sleep(1000)
 
             testedEnvelope shouldNotBe defaultEnvelope
-            testedEnvelope.topic shouldBe "rooms:lobby"
+            testedEnvelope?.topic shouldBe "rooms:lobby"
         }
     }
 }

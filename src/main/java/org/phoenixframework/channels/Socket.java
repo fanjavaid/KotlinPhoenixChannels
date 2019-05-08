@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.*;
+
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class Socket {
@@ -162,7 +163,7 @@ public class Socket {
      */
     public Channel chan(final String topic, final JsonPayload payload) {
         log.trace("chan: {}, {}", topic, payload);
-        final Channel channel = new Channel(topic, payload, Socket.this);
+        final Channel channel = new Channel(topic, Socket.this, payload);
         synchronized (channels) {
             channels.add(channel);
         }

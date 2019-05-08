@@ -87,11 +87,11 @@ class Push internal constructor(
         this.receivedEnvelope = null
 
         this.channel.on(this.refEvent, object : IMessageCallback {
-            override fun onMessage(envelope: Envelope) {
-                this@Push.receivedEnvelope = envelope
-                this@Push.matchReceive(receivedEnvelope!!.responseStatus, envelope)
-                this@Push.cancelRefEvent()
-                this@Push.cancelTimeout()
+            override fun onMessage(envelope: Envelope?) {
+                receivedEnvelope = envelope
+                matchReceive(receivedEnvelope?.responseStatus, envelope)
+                cancelRefEvent()
+                cancelTimeout()
             }
         })
 
@@ -132,7 +132,7 @@ class Push internal constructor(
         }
     }
 
-    private fun matchReceive(status: String?, envelope: Envelope) {
+    private fun matchReceive(status: String?, envelope: Envelope?) {
         synchronized(recHooks) {
             val statusCallbacks = this.recHooks[status]
             if (statusCallbacks != null) {
@@ -144,12 +144,13 @@ class Push internal constructor(
     }
 
     private fun startTimeout() {
-        this.timeoutHook.timerTask = createTimerTask()
-        this.channel.scheduleTask(this.timeoutHook.timerTask, this.timeoutHook.ms)
+        createTimerTask().let { timerTask ->
+            timeoutHook.timerTask = timerTask
+            channel.scheduleTask(timerTask, this.timeoutHook.ms)
+        }
     }
 
     companion object {
-
         private val log = LoggerFactory.getLogger(Push::class.java)
     }
 }
