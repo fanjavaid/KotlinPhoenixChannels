@@ -26,38 +26,38 @@ The quick examples below are used with the [Phoenix Chat Example](https://github
 ## Example using Kotlin
 ```kotlin
 val socket = Socket("ws://localhost:4000/socket/websocket")
-    socket.connect()
+socket.connect()
 
-    val channel = socket.chan("rooms:lobby", null)
-    channel.join()
-            .receive("ignore") {
-                println("IGNORE")
-            }
-            .receive("ok") { envelope ->
-                println("JOINED with $envelope")
-            }
+val channel = socket.chan("rooms:lobby", null)
+channel.join()
+        .receive("ignore") {
+            println("IGNORE")
+        }
+        .receive("ok") { envelope ->
+            println("JOINED with $envelope")
+        }
 
-    channel.on("new:msg") { envelope ->
-        println("NEW MESSAGE: $envelope")
-    }
+channel.on("new:msg") { envelope ->
+    println("NEW MESSAGE: $envelope")
+}
 
-    channel.on(ChannelEvent.CLOSE.phxEvent) { envelope ->
-        println("CLOSED: $envelope")
-    }
+channel.on(ChannelEvent.CLOSE.phxEvent) { envelope ->
+    println("CLOSED: $envelope")
+}
 
-    channel.on(ChannelEvent.ERROR.phxEvent) { envelope ->
-        println("ERROR: $envelope")
-    }
+channel.on(ChannelEvent.ERROR.phxEvent) { envelope ->
+    println("ERROR: $envelope")
+}
 
-    val payload = JsonPayload().apply {
-        put("user", "john")
-        put("body", "message")
-    }
-    channel.push("new:msg", payload)
+val payload = JsonPayload().apply {
+    put("user", "john")
+    put("body", "message")
+}
+channel.push("new:msg", payload)
 
-    // You also can send object as payload
-    data class Message(val user: String, val message: String)
-    channel.pushData("new:msg", Message("doe", "hi!"))
+// You also can send object as payload
+data class Message(val user: String, val message: String)
+channel.pushData("new:msg", Message("doe", "hi!"))
 ```
 
 # Contributing
