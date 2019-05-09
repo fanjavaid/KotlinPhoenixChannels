@@ -14,7 +14,7 @@ class ChannelSpec : StringSpec() {
     private val socket = Socket("ws://localhost:4000/socket/websocket")
 
     private val socketOpenCallback = mockk<SocketOpenCallback>(relaxed = true)
-    private val socketCloseCallback = mockk<ISocketCloseCallback>(relaxUnitFun = true)
+    private val socketCloseCallback = mockk<SocketCloseCallback>(relaxed = true)
     private val socketMessageCallback = mockk<MessageCallback>(relaxed = true)
     private val socketErrorCallback = mockk<ErrorCallback>(relaxed = true)
 

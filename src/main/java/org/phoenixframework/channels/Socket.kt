@@ -34,7 +34,7 @@ class Socket @JvmOverloads constructor(
     private val sendBuffer = LinkedBlockingQueue<RequestBody>()
 
     private val socketCloseCallbacks = Collections
-            .newSetFromMap(HashMap<ISocketCloseCallback, Boolean>())
+            .newSetFromMap(HashMap<SocketCloseCallback, Boolean>())
 
     private val socketOpenCallbacks = Collections
             .newSetFromMap(HashMap<SocketOpenCallback, Boolean>())
@@ -104,8 +104,8 @@ class Socket @JvmOverloads constructor(
             log.trace("WebSocket onClose {}/{}", code, reason)
             this@Socket.webSocket = null
 
-            for (callback in socketCloseCallbacks) {
-                callback.onClose()
+            for (socketCloseCallback in socketCloseCallbacks) {
+                socketCloseCallback.invoke()
             }
         }
 
@@ -179,7 +179,7 @@ class Socket @JvmOverloads constructor(
      * @param callback The callback to receive CLOSE events
      * @return This Socket instance
      */
-    fun onClose(callback: ISocketCloseCallback): Socket {
+    fun onClose(callback: SocketCloseCallback): Socket {
         this.socketCloseCallbacks.add(callback)
         return this
     }

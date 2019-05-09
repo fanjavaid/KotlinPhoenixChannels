@@ -7,3 +7,4 @@ typealias MessageCallback = (envelope: Envelope?) -> Unit
 
 typealias ErrorCallback = (reason: String) -> Unit
 typealias SocketOpenCallback = () -> Unit
+typealias SocketCloseCallback = () -> Unit
