@@ -39,11 +39,9 @@ class Channel(
             receive("ok") {
                 state = ChannelState.JOINED
             }
-            timeout(object : ITimeoutCallback {
-                override fun onTimeout() {
-                    state = ChannelState.ERRORED
-                }
-            })
+            timeout {
+                state = ChannelState.ERRORED
+            }
         }
 
         onClose {

@@ -29,7 +29,7 @@ class Push internal constructor(
 
     private class TimeoutHook(val ms: Long) {
 
-        var callback: ITimeoutCallback? = null
+        var callback: TimeoutCallbcak? = null
 
         var timerTask: TimerTask? = null
 
@@ -68,7 +68,7 @@ class Push internal constructor(
      * @param callback The callback handler called when timeout is reached
      * @return This instance's self
      */
-    fun timeout(callback: ITimeoutCallback): Push {
+    fun timeout(callback: TimeoutCallbcak): Push {
         if (this.timeoutHook.hasCallback()) {
             throw IllegalStateException("Only a single after hook can be applied to a Push")
         }
@@ -121,7 +121,7 @@ class Push internal constructor(
         val callback = Runnable {
             cancelRefEvent()
             if (timeoutHook.hasCallback()) {
-                timeoutHook.callback?.onTimeout()
+                timeoutHook.callback?.invoke()
             }
         }
 
