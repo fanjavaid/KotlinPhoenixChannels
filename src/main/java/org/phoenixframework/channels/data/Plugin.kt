@@ -19,4 +19,9 @@ object Plugin : PhoenixChannelConfiguration {
     override fun <T> toJson(data: T): String? {
         return configuration.toJson(data)
     }
+
+    internal fun toPayload(data: Any): JsonPayload? {
+        val rawJson = toJson(data) ?: return null
+        return fromJson(rawJson, JsonPayload::class.java)
+    }
 }

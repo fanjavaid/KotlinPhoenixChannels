@@ -1,6 +1,7 @@
 package org.phoenixframework.channels
 
 import org.phoenixframework.channels.data.JsonPayload
+import org.phoenixframework.channels.data.Plugin
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.util.*
@@ -186,6 +187,11 @@ class Channel(
     }
 
     @Throws(IOException::class)
+    fun pushData(event: String, payload: Any): Push {
+        return push(event, Plugin.toPayload(payload), DEFAULT_TIMEOUT)
+    }
+
+    @Throws(IOException::class)
     @JvmOverloads
     fun push(event: String, payload: JsonPayload? = null): Push {
         return push(event, payload, DEFAULT_TIMEOUT)
@@ -270,7 +276,7 @@ class Channel(
 
     companion object {
 
-        private val DEFAULT_TIMEOUT: Long = 5000
+        private const val DEFAULT_TIMEOUT: Long = 5000
 
         private val log = LoggerFactory.getLogger(Channel::class.java)
     }

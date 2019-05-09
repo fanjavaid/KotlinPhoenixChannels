@@ -5,6 +5,8 @@ import io.kotlintest.specs.StringSpec
 import io.mockk.mockk
 import io.mockk.verify
 import org.phoenixframework.channels.*
+import org.phoenixframework.channels.data.JsonPayload
+import org.phoenixframework.channels.data.Plugin
 
 /** This test class must be executed with https://github.com/chrismccord/phoenix_chat_example
  * running on local server
@@ -54,5 +56,40 @@ class ChannelSpec : StringSpec() {
             testedEnvelope shouldNotBe defaultEnvelope
             testedEnvelope?.topic shouldBe "rooms:lobby"
         }
+
+        "Send message" {
+            val channel = connectToChannel()
+            val payload = JsonPayload().apply {
+                put("user", "john")
+                put("body", "Hi!")
+            }
+            channel.push("new:msg", payload)
+        }
+
+        "Send message as data" {
+            val channel = connectToChannel()
+            channel.pushData("new:msg", Message("Don", "Hiya!"))
+        }
+
+        "Plugin: any to json payload" {
+            val message = Message("john", "hoho")
+            val payload = Plugin.toPayload(message)
+
+            payload?.get("user") shouldBe "john"
+        }
+    }
+
+    private fun connectToChannel(): Channel {
+        socket.connect()
+        val channel = socket.chan("rooms:lobby").apply {
+            join()
+        }
+        Thread.sleep(1000)
+        return channel
     }
 }
+
+data class Message(
+        val user: String,
+        val body: String
+)
