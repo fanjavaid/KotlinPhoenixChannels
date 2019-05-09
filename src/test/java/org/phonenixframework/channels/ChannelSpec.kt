@@ -13,10 +13,10 @@ class ChannelSpec : StringSpec() {
 
     private val socket = Socket("ws://localhost:4000/socket/websocket")
 
-    private val socketOpenCallback = mockk<ISocketOpenCallback>(relaxUnitFun = true)
+    private val socketOpenCallback = mockk<SocketOpenCallback>(relaxed = true)
     private val socketCloseCallback = mockk<ISocketCloseCallback>(relaxUnitFun = true)
-    private val socketMessageCallback = mockk<MessageCallback>(relaxUnitFun = true)
-    private val socketErrorCallback = mockk<ErrorCallback>(relaxUnitFun = true)
+    private val socketMessageCallback = mockk<MessageCallback>(relaxed = true)
+    private val socketErrorCallback = mockk<ErrorCallback>(relaxed = true)
 
     override fun beforeTest(testCase: TestCase) {
         super.beforeTest(testCase)
@@ -35,7 +35,7 @@ class ChannelSpec : StringSpec() {
     init {
         "Socket connects" {
             socket.connect()
-            verify(exactly = 1) { socketOpenCallback.onOpen() }
+            verify(exactly = 1) { socketOpenCallback() }
         }
 
         "Channel subscribe" {

@@ -37,7 +37,7 @@ class Socket @JvmOverloads constructor(
             .newSetFromMap(HashMap<ISocketCloseCallback, Boolean>())
 
     private val socketOpenCallbacks = Collections
-            .newSetFromMap(HashMap<ISocketOpenCallback, Boolean>())
+            .newSetFromMap(HashMap<SocketOpenCallback, Boolean>())
 
     private val timer = Timer("Reconnect Timer for $endpointUri")
 
@@ -65,8 +65,8 @@ class Socket @JvmOverloads constructor(
 
             startHeartbeatTimer()
 
-            for (callback in socketOpenCallbacks) {
-                callback.onOpen()
+            for (socketOpenCallback in socketOpenCallbacks) {
+                socketOpenCallback.invoke()
             }
 
             this@Socket.flushSendBuffer()
@@ -212,7 +212,7 @@ class Socket @JvmOverloads constructor(
      * @param callback The callback to receive OPEN events
      * @return This Socket instance
      */
-    fun onOpen(callback: ISocketOpenCallback): Socket {
+    fun onOpen(callback: SocketOpenCallback): Socket {
         cancelReconnectTimer()
         this.socketOpenCallbacks.add(callback)
         return this
