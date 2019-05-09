@@ -2,7 +2,7 @@ package org.phoenixframework.channels
 
 import okhttp3.*
 import okio.ByteString
-import org.phoenixframework.channels.data.DefaultPayload
+import org.phoenixframework.channels.data.EmptyPayload
 import org.phoenixframework.channels.data.JsonPayload
 import org.phoenixframework.channels.data.Plugin
 import org.slf4j.LoggerFactory
@@ -232,7 +232,7 @@ class Socket @JvmOverloads constructor(
         node["event"] = envelope.event
         node["ref"] = envelope.getRef() ?: ""
         node["join_ref"] = envelope.joinRef ?: ""
-        node["payload"] = envelope.payload ?: DefaultPayload
+        node["payload"] = envelope.payload ?: EmptyPayload
         val json = Plugin.toJson<Any>(node)
 
         log.trace("push: {}, isConnected:{}, JSON:{}", envelope, isConnected, json)
@@ -345,7 +345,7 @@ class Socket @JvmOverloads constructor(
                         val envelope = Envelope(
                                 "phoenix",
                                 "heartbeat",
-                                DefaultPayload,
+                                EmptyPayload,
                                 this@Socket.makeRef(), null
                         )
                         this@Socket.push(envelope)
