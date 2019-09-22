@@ -1,6 +1,8 @@
 package org.phoenixframework.channels
 
 import okhttp3.*
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.toRequestBody
 import okio.ByteString
 import org.phoenixframework.channels.data.EmptyPayload
 import org.phoenixframework.channels.data.JsonPayload
@@ -9,6 +11,7 @@ import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.util.*
 import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.TimeUnit
 
 class Socket @JvmOverloads constructor(
         private val endpointUri: String,
@@ -21,7 +24,7 @@ class Socket @JvmOverloads constructor(
 
     private var heartbeatTimerTask: TimerTask? = null
 
-    private val httpClient = OkHttpClient()
+    private val httpClient = OkHttpClient.Builder()
 
     private val messageCallbacks = Collections.newSetFromMap(HashMap<MessageCallback, Boolean>())
 
@@ -58,7 +61,7 @@ class Socket @JvmOverloads constructor(
 
     inner class PhoenixWSListener : WebSocketListener() {
 
-        override fun onOpen(webSocket: WebSocket?, response: Response?) {
+        override fun onOpen(webSocket: WebSocket, response: Response) {
             log.trace("WebSocket onOpen: {}", webSocket)
             this@Socket.webSocket = webSocket
             cancelReconnectTimer()
@@ -72,11 +75,11 @@ class Socket @JvmOverloads constructor(
             this@Socket.flushSendBuffer()
         }
 
-        override fun onMessage(webSocket: WebSocket?, text: String?) {
+        override fun onMessage(webSocket: WebSocket, text: String) {
             log.trace("onMessage: {}", text)
 
             try {
-                val envelope = Plugin.fromJson(text!!, Envelope::class.java)
+                val envelope = Plugin.fromJson(text, Envelope::class.java)
                 synchronized(channels) {
                     for (channel in channels) {
                         if (channel.isMember(envelope)) {
@@ -94,13 +97,13 @@ class Socket @JvmOverloads constructor(
 
         }
 
-        override fun onMessage(webSocket: WebSocket?, bytes: ByteString) {
+        override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
             onMessage(webSocket, bytes.toString())
         }
 
-        override fun onClosing(webSocket: WebSocket?, code: Int, reason: String?) {}
+        override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {}
 
-        override fun onClosed(webSocket: WebSocket?, code: Int, reason: String?) {
+        override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
             log.trace("WebSocket onClose {}/{}", code, reason)
             this@Socket.webSocket = null
 
@@ -109,14 +112,14 @@ class Socket @JvmOverloads constructor(
             }
         }
 
-        override fun onFailure(webSocket: WebSocket?, t: Throwable?, response: Response?) {
+        override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
             log.warn("WebSocket connection error", t)
             try {
                 //TODO if there are multiple errorCallbacks do we really want to trigger
                 //the same channel error callbacks multiple times?
                 triggerChannelError()
                 for (callback in errorCallbacks) {
-                    callback.invoke(t?.message ?: "")
+                    callback.invoke(t.message ?: "")
                 }
             } finally {
                 // Assume closed on failure
@@ -162,7 +165,10 @@ class Socket @JvmOverloads constructor(
         val httpUrl = this.endpointUri.replaceFirst("^ws:".toRegex(), "http:")
                 .replaceFirst("^wss:".toRegex(), "https:")
         val request = Request.Builder().url(httpUrl).build()
-        webSocket = httpClient.newWebSocket(request, wsListener)
+        webSocket = httpClient
+                .pingInterval(1, TimeUnit.SECONDS)
+                .build()
+                .newWebSocket(request, wsListener)
     }
 
     @Throws(IOException::class)
@@ -237,7 +243,7 @@ class Socket @JvmOverloads constructor(
 
         log.trace("push: {}, isConnected:{}, JSON:{}", envelope, isConnected, json)
 
-        val body = RequestBody.create(MediaType.parse("text/xml"), json!!)
+        val body = json!!.toRequestBody("text/xml".toMediaTypeOrNull())
 
         if (this.isConnected) {
             webSocket?.send(json)
