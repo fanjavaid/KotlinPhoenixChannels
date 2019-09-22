@@ -166,7 +166,10 @@ class Socket @JvmOverloads constructor(
                 .replaceFirst("^wss:".toRegex(), "https:")
         val request = Request.Builder().url(httpUrl).build()
         webSocket = httpClient
-                .pingInterval(1, TimeUnit.SECONDS)
+                .connectTimeout(5, TimeUnit.SECONDS)
+                .writeTimeout(5, TimeUnit.SECONDS)
+                .readTimeout(15, TimeUnit.SECONDS)
+                .pingInterval(5, TimeUnit.SECONDS)
                 .build()
                 .newWebSocket(request, wsListener)
     }
